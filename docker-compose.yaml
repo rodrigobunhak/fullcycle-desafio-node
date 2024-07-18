@@ -1,0 +1,46 @@
+services:
+
+  app:
+    build:
+      context: node
+      dockerfile: Dockerfile.prod
+    container_name: app
+    networks:
+      - nodenet
+    volumes:
+      - ./node:/usr/src/app
+    tty: true
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  db:
+    image: mysql:5.7
+    command: --innodb-use-native-aio=0
+    container_name: db
+    restart: always
+    tty: true
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - MYSQL_DATABASE=nodedb
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+      - nodenet
+
+  web-server:
+    build:
+      context: nginx
+      dockerfile: Dockerfile.prod
+    container_name: nginx
+    networks:
+      - nodenet
+    tty: true
+    ports:
+      - "8080:80"
+
+networks:
+  nodenet:
+    driver: bridge
