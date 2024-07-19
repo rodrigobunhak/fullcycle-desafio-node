@@ -3,8 +3,8 @@ services:
   app:
     build:
       context: node
-      dockerfile: Dockerfile.prod
     container_name: app
+    entrypoint: dockerize -wait tcp://db:3306 -timeout 20s node index.js
     networks:
       - nodenet
     volumes:
@@ -34,7 +34,6 @@ services:
   web-server:
     build:
       context: nginx
-      dockerfile: Dockerfile.prod
     container_name: nginx
     networks:
       - nodenet
